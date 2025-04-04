@@ -1,0 +1,158 @@
+---
+title: "Case 4: Prediction of Oil & Gas Production"
+author:  Prof. John Williams
+
+
+format:
+    html: 
+        theme: zephyr
+        html-math-method: katex
+        embed-resources: true
+        self-contained-math: true
+        number-sections: true
+        title-block-banner: true
+        grid: 
+            body-width: 1000px
+
+---
+
+## Minimizing Decision-Making Risk
+
+So in this module, we're going to take a look at how we might minimize the risk in decision making, particularly with respect to buying oil and gas leases.
+
+Now, buying any property is quite a risky business. First, it's expensive. And certainly, oil and gas leases are very expensive, indeed, running into the billions of dollars. Getting information about a property such as an oil and gas lease is quite difficult. And what we're going to do is we're going to apply data science and machine learning to analyzing data about properties.
+
+Some of this was motivated by an experience I had. The Boston seaport area is now coming up in the market and is quite expensive. And I thought I'd take a look at apartments there. So I went down there and took a look, and they're beautiful. And they're close to the city. They're close to MIT. They're close to the subway and close to the highways. So all in all, it looks pretty good. However, I talked to a colleague of mine that's a civil engineer, and he told me watch out, because that area is now in the flood plain. That two years ago it flooded and the roads were 6 inches deep in water. And they're predicting if a 100-year storm hit, it might actually look like this other photo. 
+
+Now, I think that that may be over exaggerating, but you can see that information can alter radically the price that you would pay for property. So what we're going to do is we're going to look at oil and gas leases and look at the data that's available and see if we can pull it apart and understand exactly what it means for buying oil and gas leases.
+
+## Predicting Future Production Rates
+
+In the US, there are over 12 million people that receive royalties for oil and gas. So typically, there are thousands of wells around the US that have been drilled. Now, what we wanted to do was to be able to predict, better than present technology allowed, the production rates, and particularly, out into the future.
+
+So for example, typically with a well when its first starts producing, it will climb up to some maximum and then start to decline. So every month, there'll be less and less oil produced. And those type curves are what we were trying to accurately predict. Let me explain how a well is drilled and how the technology is applied to that well so that it can produce oil and gas. 
+
+We're going to be concerned with the Bakken region in North Dakota. And that's a shale, and it's a tight oil shale. What that means is that the permeability is very low. So you can imagine it like a sheet of glass that fluid just won't permeate through it. We have to do something to that rock to make it more permeable. And what we do is we hydrofrack it. So the way it works is we drill vertically down until we hit the formation, the oil-bearing formation. And then we drill horizontally. And that's called our lateral length, that horizontal section. And obviously, the greater that lateral length, the more of the oil-bearing rock that we're sampling. Now, to increase that surface area, we hydrofrack. So we'll pack off-- they're called stages-- we'll pack off a stage of that lateral length, and we'll pump in high pressure water to create a fracture. And then we'll pump what we call proppant into that fracture. So this could be sand or ceramic particles. The idea of the proppant is to hold the fracture open so we create the permeability. We create pathways for the oil and gas to flow out. So I imagine it like slices of bread. And the lateral length is a pencil, and we have these vertical slices that are planes that allow oil and gas to flow into them and then out through the lateral length and up the vertical well. So that's the technology. 
+
+Now, in the Bakken basin, we have over 3,600 wells where there's data. The data that we have is typically monthly production rates. We've got lateral length drilled. We typically don't have the number of stages. Sometimes we do, but that obviously will be correlated with the lateral length. The greater the lateral length, the greater the number of stages that you can have in that lateral length. So that would be a correlated variable. It wouldn't be independent. So we probably want to choose just the lateral length. Now, for the hydrofrack to characterize that, we have the amount of water that was used in fracking. We also have the massive proppant that was put in place. And that'll be related to the permeability created. 
+
+Now, the model that we use today is one developed by Patzek et al. (2013). And it's a one-dimensional flow model into these fracture plains. And there are two variables that are critical to this model. So this model will predict the type curves, the production curves, but it has two parameters, two hyper-parameter, if you like. One is the total mass of oil or gas. Let's call it capital M. Now, we don't know that obviously. And also it has a time constant, tau. And again, that's an unknown. When we use those, in hindsight, in old wells, we see that we actually get very good predictions of the type curves. But our problem is with a new lease, we don't know either of those two parameters. So if you look at our prediction say, if we have the first 6 months or 12 months of production, we could choose many, many different type curves that fit that first 12 months. So when we're predicting up to 60 months, 5 years, we have great variability in our prediction. And what we wanted to do was to use data science on this data to get better predictions to decrease this variability in these type curves. So let's take a look at the data and the data science that we applied to this problem.
+
+
+## Linear Regression and Predicting with Data
+
+So let's quickly go over ordinary linear regression. So our basic equation is that we have data points that we are randomly choosing from a distribution, a single distribution that has a single mean and a single variance. So we have our independent variables, $\bf{x}$, and the dependent variables $\bf{y}$ where: 
+$$ \bf{y} = \beta \cdot \bf{X} $$
+
+where $\beta$ are our model parameters. So if we're doing say, a straight line, like linear regression in $xy$ space, the $\beta$ would be the intercept and the slope of the line, so $\beta$ are the things we're trying to find. And in general, we won't be able to put the line through all the points. So we're going to have some error term $e$:
+$$ y = \beta \cdot X + e $$
+
+Now, let's write those out. 
+
+$$
+\begin{bmatrix}
+y_1 \\ y_2 \\ . \\y_n
+\end{bmatrix} 
+= 
+\begin{bmatrix}
+    \beta_0 \\ 
+    \beta_1
+\end{bmatrix}
+\cdot
+\begin{bmatrix} 
+1 & x_{1} \\ 
+1 & x_{2} \\ 
+1 & x_{3} \\ 
+\ldots \\ 
+1 & x_{n} 
+\end{bmatrix}
++ e
+$$
+
+So now we have our y1's, y2 up to yn equals-- and on the right-hand side, our x is the intercept is going to be beta 0, so we have a column of 1's that multiply that, because it's the same intercept. We're going to have a single intercept. And now, our x1, x2, x3 are going to be multiplying the beta 1, the slope. 
+
+So what do we know? Well, we know that our predictions here using our model can only lie in the column space. So the column space is this vector of 1's. And the other vector is the x1, x2, x3 vector. So we have these two vectors. Now, we can only predict points in that column space. And we have an error, because our solution doesn't lie in that column space. And what do we know about the arrow? Well, it's perpendicular to the column space. So what this means is that x transpose, if I take the transpose of these x's and I dot that with e, which is perpendicular to each of those vectors, then it's got to be 0. So we can solve this algebraically by multiplying through by x transpose. So we get x transpose of x beta equals x transpose of y, and then the error term has disappeared. Now, we can take the inverse of x transpose x, and we get beta equals x transpose x inverse to the minus 1 times x transpose y. That's our solution for the betas. Now, we've made some assumptions. We've made the assumption that all of our independent variables are drawn from identically the same distribution. So what we mean by that is the single underlying model distribution, say a normal distribution with a single mean and a single variance. Now, that's not always true. And so what do we do? Well, you've probably heard of the variance-covariance matrix. So our variance is the sigma squared are down the diagonal. So we're saying now-- and if it was a single variance for all of these variables, that sigma-- there would just be 1 sigma squared. Every term on the diagonal would be the same sigma squared. But if the variance varies, then we'll have different sigma squared down the diagonal. We'll have sigma squared x0 variable, sigma squared for x1, sigma squared for x2, et cetera, down to sigma squared of xn. Now, if our data is also correlated in space, say spatial correlation, we will have terms on the off diagonal. Here I've written them as w, x0, x1, w x0, x2. So these are kind of weights. How much a variable or a reading-- a data point at one position, x0 affects data in another position, x1. So these, we'd have to determine somehow. But for now, let's assume we have this matrix. Let's call it omega. We can rewrite it. We'll abbreviate it here where I have got omega equals sigma 0 squared, sigma w01, w02, et cetera. Now, the thing to notice is that this is a symmetric matrix. Even though we have all this coupling, it's symmetric. And it's positive definite. Now, since it's symmetric and positive definite, we can do Cholesky decomposition on it. So what I mean by that is we can rewrite omega as pp transpose. We know we can do that. What does this mean? Well, let's take an example here. I've taken omega equals-- I'm going to assume just two variables-- and I'm saying it's a 2-by-2 matrix now. And let's have 10 and 1 on the diagonals. So this means the sigma 0 squared is 10 and the sigma 1 squared is 1. So what are we doing there? We got different variances. Somehow we've scaled things. On the off diagonal, I've got minus 3 and 3. And I write my p and p transpose. And p is the square root of 10 and 0, so it's lower triangle. And we've got minus 0.95 and 0.31. And p transpose is obviously upper triangle, and just transpose those rows and columns. OK, so let's do an experiment. Suppose I take my x's, and let me scale them by a factor p. Well, if p is greater than 1, it means that those x's will get further apart. We'll be multiplying each x say, by 2 or 4 or 10. And that means they're going to be stretched. And what it means is that the variance also is going to change. So let's take some uncorrelated random variables. Let me call them z. And that means, let's take them to have a mean of 0 and a variance of 1. So we'll just draw them from that distribution. And let's transform them so that now we're going to multiply the z's by this factor p. What's going to happen is that the result is going to be a set of correlated values. So let's write x equals a plus pz. A is just a constant, but that's going to change the mean. The p is going to change the variance. So let's plot those out. And we're doing it for this matrix p that we've just calculated from the omega, and we'll see that these give correlated values. Now, how could we uncorrelate them? Well, we multiplied them by p to make them correlated. So if we just pre-multiply by it p to the minus 1-- so p to the minus 1 p of z will take us back to z. So we can create correlated variables, but suppose we are given correlated variables. This means we have a means of uncorrelating them. And we're going to see next how to do that. Let's now multiply our correlated data by p to the minus 1. And as you see in the result in our Jupyter Notebook, it produces randomly distributed variables again. So we're going to use this trick, if you like, to uncorrelated correlated data when we have it. So we need to find the omega matrix, do Cholesky decomposition on it to find our matrix p, and then we can calculate p to the minus 1. And this is what generalized linear regression does. So let's take a look now at generalized linear regression. So we're going to use this transform, this p to the minus 1 transform, where pp transpose equals the omega matrix, the variance-covariance matrix. So here, we've got as usual, y equals x beta plus u, where u is the error. Now, our omega term is full, so we've got sigma 0 squared, sigma 1 squared, sigma 2 squared, down the diagonal. But we've also got spatial correlation. We've got weights between points x0, x1, x2, et cetera. So we've got w01, w02, w03, et cetera along the top row, and the full matrix is defined. So we're assuming we've got that matrix. Now, if we have that, how do we decorrelate? Well, we've got a full matrix, and we know we can decorrelate it if we find p to the minus 1. And we know exactly how to do that by Cholesky decomposition. So omega equals pp transpose. And from that, we can find p inverse. So now we define a transform. We're going to let y hat equal p to the minus 1y, so y hat equals p to the minus 1y. And the same with x. x hat equals p to the minus 1s. So now we've got a scaled version of the regression equation. So now what do we do? Well, we pre-multiply by what? Do you remember we said pre-multiply by x transpose? So now it would be x hat transpose. So our equation is x hat transpose, x hat beta hat equals x transpose hat y hat. And we know how to solve that. We have now, beta hat equals-- we just need to take the inverse of x hat transpose x hat, so we've got the inverse of that-- then times x hat transpose y hat. And if we work through the mathematics now and substitute back in, instead of x hat, we substitute p to the minus 1x, et cetera, we get this equation beta hat equals x transpose p to the minus 1 all transposed, p to the minus 1x, and all of that we take the inverse. Now, we've got times x transpose p to the minus 1 transpose times p to the minus 1y. So we've got a nice form now. If we reduce that, we'll see that it comes to getting rid of some of the p to the minus 1's and p's. We see that it comes beta hat equals x transpose omega to the minus 1x, all inverted to the minus 1, times x transpose omega to the minus 1y. And we can show that the expected value of better hat is the same as beta, and the variance of beta hat is x transpose omega to the minus 1x, all inverted. And we can also show that this is our best linear unbiased estimator. It's a blue estimator. So this is generalized least squares and tells us how to handle correlated data and data that has different variances. Now, let's go and we'll take a look at our problem with the oil wells.
+
+
+## Results
+
+
+PROFESSOR: OK.
+Let's take a look at the results of our project.
+We've applied several techniques.
+The most important was the generalized linear regression.
+So this was where we calculated our beta hats.
+Remember?
+We did the P to the minus 1 transform,
+and that helped to get rid of the autocorrelation.
+We also saw the importance of the variance-covariance matrix.
+So we had to estimate the sigmas,
+and we had to estimate the off diagonal terms, which
+represented the spatial correlation.
+So the w 0, 1, w 0, 2, et cetera-- those weights.
+And we also saw that we needed to add more constraints,
+that our problem was underconstrained,
+that we could put a prediction through the first six
+to 12 months, but that still gave us great variance
+out at five years.
+And we needed to constrain it.
+And so, there, we used regularization.
+And so those were the things that we applied.
+And we developed five different models.
+Three of them didn't use these techniques,
+but the last two did.
+The one called SEM is the Spatial Error Method.
+And that, in fact, is exactly what I've described to you now,
+in this talk.
+But also we did regression-kriging.
+And that applies very similar techniques,
+but in a slightly different way.
+Now we can see how successful these techniques have
+been at addressing these problems,
+the problem of spatial correlation and of variance.
+And there's an index called Moran's Index.
+And I'm showing it here.
+Now, for the first three models, it's around 0.5, 0.4, 0.4.
+So that actually is quite high.
+When we apply this correlation, or rather decorrelation,
+we see that Moran's Index is down at 0.008 and even smaller
+for the kriging.
+So these techniques are very successful at getting rid
+of that correlation problem.
+Let's take a look at our predictions.
+And so here, this is predicting actual versus
+predicted for first year of production over several years.
+And you'll see that the black line is the actual and our SEM
+and our K models actually do very well indeed.
+And this is another diagram showing what
+would be perfect predictions--
+these are the red lines--
+and the results of our SEM models and the kriging models.
+And those were the black dots.
+And again, the agreement is quite good.
+Now, one of the questions that industry wanted to answer
+was, what's the effect of new technology?
+Because actually the government uses
+that to estimate our oil reserves for the future.
+And it seems that, the way the government
+has been doing it, that they are overestimating
+the effect of the technology, certainly as
+far as the Williston Basin and North Dakota.
+So here we will show that, in the SEM model,
+the actual location is much more important
+than the proppant water, et cetera.
+And the lateral length has just small impact.
+The fracking has about 50%.
+But also the sweet spotting, choosing the right location,
+has almost 50% impact as well.
+So that was a result that was unexpected
+and that, in fact, the US government
+now, due to Justin's thesis, has changed the way that it
+estimates oil reserves.
+So I hope you've enjoyed this module.
+There's obviously still work left to be done.
+But this was a case where we're handling quite noisy data
+and data that is quite spatially variable and is correlated.
+And I hope we've demonstrated how
+to deal with that correlation, how to remove it
+from our calculations.
